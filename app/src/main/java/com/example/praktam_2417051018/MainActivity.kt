@@ -1,64 +1,107 @@
 package com.example.praktam_2417051018
 
-import Model.Food
-import Model.FoodSource
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.praktam_2417051018.ui.theme.PrakTAM_2417051018Theme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.layout.ContentScale.Companion.Crop
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
-import com.example.praktam_2417051018.ui.theme.PrakTAM_2417051018Theme
-
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.praktam_2417051018.model.Movie
+import com.example.praktam_2417051018.model.MovieSource
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PrakTAM_2417051018Theme() {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(innerPadding)
-                }
-            }
+            HorrorScreen()
         }
     }
 }
 
 @Composable
-fun Greeting(innerPadding: PaddingValues){
-    val food = FoodSource.dummyFood[0]
+fun HorrorScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0B101B))
+            .padding(20.dp)
+    ) {
 
-    Column(modifier = Modifier.fillMaxSize().padding(all = 30.dp)){
-        Image(
-            painter = painterResource(id = food.ImageRes),
-            contentDescription = food.nama,
-            modifier = Modifier.size(200.dp),
-            contentScale = Crop
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Text(
+            text = "MoodFlix - Horror",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Red
         )
-        Text(text = "Nama: ${food.nama}")
-        Text(text = "Deskripsi: ${food.deskripsi}")
-        Text(text = "Harga: ${food.harga}")
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ROW 1
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            MovieItem(MovieSource.movieList[0], Modifier.weight(1f))
+            MovieItem(MovieSource.movieList[1], Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ROW 2
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            MovieItem(MovieSource.movieList[2], Modifier.weight(1f))
+            MovieItem(MovieSource.movieList[3], Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ROW 3
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            MovieItem(MovieSource.movieList[4], Modifier.weight(1f))
+            MovieItem(MovieSource.movieList[5], Modifier.weight(1f))
+        }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    PrakTAM_2417051018Theme {
-        Greeting(PaddingValues(0.dp))
+fun MovieItem(movie: Movie, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+
+        Image(
+            painter = painterResource(id = movie.imageRes),
+            contentDescription = movie.title,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(20.dp)),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = movie.title,
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp
+        )
+
+        Text(
+            text = movie.year,
+            color = Color.Gray,
+            fontSize = 13.sp
+        )
     }
 }
