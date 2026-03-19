@@ -8,8 +8,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -22,9 +28,11 @@ import com.example.praktam_2417051018.model.Movie
 import com.example.praktam_2417051018.model.MovieSource
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             HorrorScreen()
         }
@@ -33,10 +41,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun HorrorScreen() {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0B101B))
+            .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
 
@@ -51,7 +61,6 @@ fun HorrorScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ROW 1
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             MovieItem(MovieSource.movieList[0], Modifier.weight(1f))
             MovieItem(MovieSource.movieList[1], Modifier.weight(1f))
@@ -59,7 +68,6 @@ fun HorrorScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ROW 2
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             MovieItem(MovieSource.movieList[2], Modifier.weight(1f))
             MovieItem(MovieSource.movieList[3], Modifier.weight(1f))
@@ -67,16 +75,32 @@ fun HorrorScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ROW 3
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             MovieItem(MovieSource.movieList[4], Modifier.weight(1f))
             MovieItem(MovieSource.movieList[5], Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            MovieItem(MovieSource.movieList[6], Modifier.weight(1f))
+            MovieItem(MovieSource.movieList[7], Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            MovieItem(MovieSource.movieList[8], Modifier.weight(1f))
+            MovieItem(MovieSource.movieList[9], Modifier.weight(1f))
         }
     }
 }
 
 @Composable
 fun MovieItem(movie: Movie, modifier: Modifier = Modifier) {
+
+    var isFavorite by remember { mutableStateOf(false) }
+
     Column(modifier = modifier) {
 
         Image(
@@ -91,17 +115,48 @@ fun MovieItem(movie: Movie, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            text = movie.title,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Text(
+                text = movie.title,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                modifier = Modifier.weight(1f)
+            )
+
+            IconButton(
+                onClick = { isFavorite = !isFavorite }
+            ) {
+                Icon(
+                    imageVector =
+                        if (isFavorite) Icons.Filled.Favorite
+                        else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint =
+                        if (isFavorite) Color.Red
+                        else Color.White
+                )
+            }
+        }
 
         Text(
             text = movie.year,
             color = Color.Gray,
             fontSize = 13.sp
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Detail")
+        }
     }
 }
