@@ -6,10 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -25,6 +26,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.*
+import androidx.navigation.NavHostController
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.example.praktam_2417051018.model.Movie
 import com.example.praktam_2417051018.model.MovieSource
 
@@ -35,13 +40,34 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            MovieScreen()
+            val navController = rememberNavController()
+            AppNavigation(navController)
         }
     }
 }
 
 @Composable
-fun MovieScreen() {
+fun AppNavigation(navController: NavHostController) {
+
+    NavHost(navController = navController, startDestination = "home") {
+
+        composable("home") {
+            MovieScreen(navController)
+        }
+
+        composable("detail/{title}") { backStackEntry ->
+            val title = backStackEntry.arguments?.getString("title")
+            val movie = MovieSource.movieList.find { it.title == title }
+
+            if (movie != null) {
+                DetailScreen(movie, navController)
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieScreen(navController: NavHostController) {
 
     LazyColumn(
         modifier = Modifier
@@ -53,7 +79,7 @@ fun MovieScreen() {
 
         item {
             Text(
-                text = "MoodFlix - Horror",
+                "MoodFlix - Horror",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Red
@@ -62,7 +88,7 @@ fun MovieScreen() {
 
         item {
             Text(
-                text = "Rekomendasi",
+                "Rekomendasi",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -70,18 +96,16 @@ fun MovieScreen() {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 items(MovieSource.movieList) { movie ->
-                    MovieRowItem(movie)
+                    MovieRowItem(movie, navController)
                 }
             }
         }
 
         item {
             Text(
-                text = "Daftar Film",
+                "Daftar Film",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -89,25 +113,26 @@ fun MovieScreen() {
         }
 
         items(MovieSource.movieList) { movie ->
-            MovieCard(movie)
+            MovieCard(movie, navController)
         }
     }
 }
 
 @Composable
-fun MovieRowItem(movie: Movie) {
+fun MovieRowItem(movie: Movie, navController: NavHostController) {
 
     Card(
-        modifier = Modifier.width(140.dp),
+        modifier = Modifier
+            .width(140.dp)
+            .clickable {
+                navController.navigate("detail/${movie.title}")
+            },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Column {
-
             Image(
-                painter = painterResource(id = movie.imageRes),
+                painter = painterResource(movie.imageRes),
                 contentDescription = movie.title,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -117,33 +142,33 @@ fun MovieRowItem(movie: Movie) {
             )
 
             Text(
-                text = movie.title,
-                modifier = Modifier.padding(8.dp),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
+                movie.title,
+                color = Color.White,
+                modifier = Modifier.padding(8.dp)
             )
         }
     }
 }
 
 @Composable
-fun MovieCard(movie: Movie) {
+fun MovieCard(movie: Movie, navController: NavHostController) {
 
     var isFavorite by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate("detail/${movie.title}")
+            },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
 
         Column {
 
             Image(
-                painter = painterResource(id = movie.imageRes),
+                painter = painterResource(movie.imageRes),
                 contentDescription = movie.title,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,42 +186,128 @@ fun MovieCard(movie: Movie) {
             ) {
 
                 Text(
-                    text = movie.title,
+                    movie.title,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
                     modifier = Modifier.weight(1f)
                 )
 
-                IconButton(
-                    onClick = { isFavorite = !isFavorite }
-                ) {
+                IconButton(onClick = { isFavorite = !isFavorite }) {
                     Icon(
-                        imageVector =
-                            if (isFavorite) Icons.Filled.Favorite
-                            else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint =
-                            if (isFavorite) Color.Red
-                            else Color.White
+                        if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = null,
+                        tint = if (isFavorite) Color.Red else Color.White
                     )
                 }
             }
 
             Text(
-                text = movie.year,
-                color = Color.Gray,
-                fontSize = 13.sp
+                movie.year,
+                color = Color.Gray
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             Button(
-                onClick = { },
+                onClick = { navController.navigate("detail/${movie.title}") },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Detail")
+                Text("Details")
             }
         }
+    }
+}
+
+@Composable
+fun DetailScreen(movie: Movie, navController: NavHostController) {
+
+    var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    Box(Modifier.fillMaxSize()) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF0B101B))
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp)
+        ) {
+
+            Image(
+                painter = painterResource(movie.imageRes),
+                contentDescription = movie.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                movie.title,
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                movie.year,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = movie.description,
+                color = Color.White,
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    scope.launch {
+                        isLoading = true
+                        delay(2000)
+                        snackbarHostState.showSnackbar("Now playing ${movie.title}")
+                        isLoading = false
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Loading...")
+                    }
+                } else {
+                    Text("Watch Now")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Button(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Back")
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
